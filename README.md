@@ -1,2 +1,2 @@
-# BugFables-FPSFixes
+# BugFables-FPSFixes - (Development Paused)
 Fixes Framerate Dependent in Bug Fables
