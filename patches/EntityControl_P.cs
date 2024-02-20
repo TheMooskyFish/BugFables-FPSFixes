@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
@@ -20,8 +20,9 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Ldfld, sprite),
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(OpCodes.Ldfld, spin)
-                ).RemoveInstructions(4).InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0));
-                codepatch.Set(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.EntitySpin)));
+                ).RemoveInstructions(4)
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
+                .Set(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.EntitySpin)));
                 return codepatch.InstructionEnumeration();
             }
         }
@@ -31,17 +32,32 @@ namespace FPSFixes.Patches
             [HarmonyTranspiler]
             static IEnumerable<CodeInstruction> Patch(IEnumerable<CodeInstruction> instructions)
             {
-                var codepatch = new CodeMatcher(instructions)
+                return new CodeMatcher(instructions)
                 .MatchForward(true,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(OpCodes.Ldfld),
                     new CodeMatch(OpCodes.Ret)
-                );
-                codepatch.InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_R4, (float)60));
-                codepatch.InsertAndAdvance(new CodeInstruction(OpCodes.Mul));
-                codepatch.InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Time), "get_deltaTime")));
-                codepatch.InsertAndAdvance(new CodeInstruction(OpCodes.Mul));
-                return codepatch.InstructionEnumeration();
+                )
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_R4, (float)60))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Mul))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Time), "get_deltaTime")))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Mul))
+                .InstructionEnumeration();
+            }
+        }
+        [HarmonyPatch(typeof(EntityControl), "FixedUpdate")]
+        static class LeifFlyPatch
+        {
+            [HarmonyTranspiler]
+            static IEnumerable<CodeInstruction> Patch(IEnumerable<CodeInstruction> instructions)
+            {
+                return new CodeMatcher(instructions)
+                .MatchForward(false,
+                    new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(MainManager), "framestep"))
+                )
+                .RemoveInstruction()
+                .Advance(1).Set(OpCodes.Call, AccessTools.Method(typeof(Utils), "AddDeltaTime", [typeof(float)]))
+                .InstructionEnumeration();
             }
         }
         [HarmonyPatch(typeof(EntityControl))]
