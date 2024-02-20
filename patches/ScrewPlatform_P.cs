@@ -1,23 +1,31 @@
-//using System.Reflection;
-//using HarmonyLib;
-//namespace BugFablesFixes.Patches
-//{
-//    class ScrewPlatform_P
-//    {
-//        [HarmonyPatch(typeof(ScrewPlatform), "Update")]
-//        class RotaterPatch
-//        {
-//            [HarmonyPrefix]
-//            [HarmonyWrapSafe]
-//            static void Patch(ScrewPlatform __instance, float ___a, NPCControl[] ___switches, int ___oneactive)
-//            {
-//                if (__instance.IsActive())
-//                {
-//                    float num = (___switches.Length != 1 && ___oneactive <= -1) ? 1f : (1f - ___switches[___oneactive].actioncooldown / ___switches[___oneactive].vectordata[0].z);
-//                    BFPluginFixes.Logger.LogMessage($"{___a} - NUM: {num}");
-//                }
-//            }
-//        }
-//    }
-//}
-//TODO: find out how to fix screwplatform being slow in high fps
+﻿using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
+using FPSFixes;
+using HarmonyLib;
+namespace BugFablesFixes.Patches
+{
+    class ScrewPlatform_P
+    {
+        [HarmonyPatch(typeof(ScrewPlatform), "Update")]
+        static class RotaterPatch
+        {
+            [HarmonyTranspiler]
+            static IEnumerable<CodeInstruction> Patch(IEnumerable<CodeInstruction> instructions)
+            {
+                return new CodeMatcher(instructions)
+                .MatchForward(true,
+                    new CodeMatch(OpCodes.Sub),
+                    new CodeMatch(OpCodes.Br),
+                    new CodeMatch(OpCodes.Ldc_R4),
+                    new CodeMatch(OpCodes.Stloc_1)
+                ).Advance(1).InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldloc_1),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.AddDeltaTime), new[] { typeof(float) })),
+                    new CodeInstruction(OpCodes.Stloc_1)
+                ).InstructionEnumeration();
+            }
+        }
+    }
+}
+//NOTE: platforms are still very slow but at least won't take long time to start moving
