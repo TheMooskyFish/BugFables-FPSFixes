@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
-using FPSFixes;
 using HarmonyLib;
-namespace BugFablesFixes.Patches
+namespace FPSFixes.Patches
 {
     class ScrewPlatform_P
     {
