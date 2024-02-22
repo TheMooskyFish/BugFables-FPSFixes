@@ -12,12 +12,10 @@ namespace FPSFixes.Patches
             static IEnumerable<CodeInstruction> Patch(IEnumerable<CodeInstruction> instructions)
             {
                 return new CodeMatcher(instructions)
-                .MatchForward(true,
-                    new CodeMatch(OpCodes.Sub),
-                    new CodeMatch(OpCodes.Br),
-                    new CodeMatch(OpCodes.Ldc_R4),
-                    new CodeMatch(OpCodes.Stloc_1)
-                ).Advance(1).InsertAndAdvance(
+                .MatchForward(false,
+                    new CodeMatch(OpCodes.Ldloc_0),
+                    new CodeMatch(OpCodes.Brfalse)
+                ).InsertAndAdvance(
                     new CodeInstruction(OpCodes.Ldloc_1),
                     new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.AddDeltaTime), new[] { typeof(float) })),
                     new CodeInstruction(OpCodes.Stloc_1)
