@@ -5,7 +5,7 @@ using HarmonyLib;
 
 namespace FPSFixes
 {
-    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3")]
+    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3.0")]
     [BepInProcess("Bug Fables.exe")]
     public class CorePlugin : BaseUnityPlugin
     {
