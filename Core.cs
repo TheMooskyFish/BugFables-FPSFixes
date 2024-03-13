@@ -5,12 +5,12 @@ using HarmonyLib;
 
 namespace FPSFixes
 {
-    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3.0")]
+    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3.1")]
     [BepInProcess("Bug Fables.exe")]
     public class CorePlugin : BaseUnityPlugin
     {
         public static new ManualLogSource Logger;
-        public static readonly string Version = MetadataHelper.GetMetadata(typeof(CorePlugin)).Version.ToString() + "-DEV";
+        public static string Version = MetadataHelper.GetMetadata(typeof(CorePlugin)).Version.ToString();
         public static ConfigEntry<float> GUICameraSize;
         public static ConfigEntry<bool> ToggleUtilsdeltaTime;
         public static ConfigEntry<bool> ToggleFixShakeSprite;
@@ -19,6 +19,7 @@ namespace FPSFixes
         {
             Logger = base.Logger;
             SetUpConfig();
+            StartCoroutine(new UpdateChecker().CheckUpdate());
             var harmony = new Harmony("dev.mooskyfish.FPSFixes");
             harmony.PatchAll();
         }
