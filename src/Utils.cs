@@ -1,7 +1,9 @@
+﻿using System.Reflection.Emit;
+using HarmonyLib;
 using UnityEngine;
 namespace FPSFixes
 {
-    public class Utils
+    public static class Utils
     {
         public static float AddDeltaTime(float number)
         {
@@ -30,6 +32,14 @@ namespace FPSFixes
         {
             if (entity.animstate != 101 && !MainManager.player.digging && MainManager.SoundIsPlaying("Dig") == -1)
                 MainManager.PlaySound("Dig", -1, 1f, 0.7f);
+        }
+        public static CodeMatcher Nopify(this CodeMatcher codeMatcher, int instsnumber)
+        {
+            foreach (var _ in codeMatcher.InstructionsWithOffsets(0, instsnumber))
+            {
+                codeMatcher.SetAndAdvance(OpCodes.Nop, null);
+            }
+            return codeMatcher;
         }
     }
 }

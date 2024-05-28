@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 namespace FPSFixes.Patches
 {
-    class FixesClass
+    class SmallPatches
     {
         [HarmonyPatch(typeof(MainManager), "ApplySettings")]
         class VSyncPatch

@@ -20,7 +20,8 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Ldfld, sprite),
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(OpCodes.Ldfld, spin)
-                ).RemoveInstructions(4)
+                )
+                .Nopify(3)
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
                 .Set(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.EntitySpin)));
                 return codepatch.InstructionEnumeration();
@@ -38,10 +39,11 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Ldfld),
                     new CodeMatch(OpCodes.Ret)
                 )
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_R4, (float)60))
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Mul))
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Time), "get_deltaTime")))
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Mul))
+                .Insert(
+                    new CodeInstruction(OpCodes.Ldc_R4, (float)60),
+                    new CodeInstruction(OpCodes.Mul),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Time), "get_deltaTime")),
+                    new CodeInstruction(OpCodes.Mul))
                 .InstructionEnumeration();
             }
         }
@@ -55,7 +57,7 @@ namespace FPSFixes.Patches
                 .MatchForward(false,
                     new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(MainManager), "framestep"))
                 )
-                .RemoveInstruction()
+                .SetAndAdvance(OpCodes.Nop, null)
                 .Advance(1).Set(OpCodes.Call, AccessTools.Method(typeof(Utils), "AddDeltaTime", [typeof(float)]))
                 .InstructionEnumeration();
             }

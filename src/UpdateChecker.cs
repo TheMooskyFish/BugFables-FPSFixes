@@ -14,7 +14,7 @@ namespace FPSFixes
         {
             public string tag_name = null;
         }
-        public string _url = "https://api.github.com/repos/TheMooskyFish/BugFables-FPSFixes/releases/latest";
+        private const string _url = "https://api.github.com/repos/TheMooskyFish/BugFables-FPSFixes/releases/latest";
         public IEnumerator CheckUpdate()
         {
             var web = UnityWebRequest.Get(_url);
