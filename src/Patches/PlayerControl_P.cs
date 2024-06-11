@@ -21,16 +21,13 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Ldc_I4_S),
                     new CodeMatch(OpCodes.Beq),
                     new CodeMatch(OpCodes.Ldarg_0)
-                )
-                .Nopify(13)
+                ).Nopify(13)
                 .InsertAndAdvance(
                     new CodeInstruction(OpCodes.Ldarg_0),
                     new CodeInstruction(OpCodes.Ldfld, entity),
                     new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.DigSound)))
-                )
-                .InstructionEnumeration();
+                ).InstructionEnumeration();
             }
-
         }
     }
 }

@@ -20,7 +20,7 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Ldc_R4),
                     new CodeMatch(OpCodes.Ldc_R4, (float)0.3)
                 ).Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.AddDeltaTime), [typeof(float)])))
+                .InsertAndAdvance(Utils.AddDeltaTimeFloat)
                 .InstructionEnumeration();
             }
         }

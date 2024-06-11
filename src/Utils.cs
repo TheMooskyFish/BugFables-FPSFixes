@@ -5,6 +5,8 @@ namespace FPSFixes
 {
     public static class Utils
     {
+        public static CodeInstruction AddDeltaTimeFloat = new(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(AddDeltaTime), [typeof(float)]));
+        public static CodeInstruction AddDeltaTimeVector = new(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(AddDeltaTime), [typeof(Vector3)]));
         public static float AddDeltaTime(float number)
         {
             if (CorePlugin.ToggleUtilsdeltaTime.Value)
@@ -39,6 +41,14 @@ namespace FPSFixes
             {
                 codeMatcher.SetAndAdvance(OpCodes.Nop, null);
             }
+            return codeMatcher;
+        }
+        public static CodeMatcher MatchThenNopify(this CodeMatcher codeMatcher, bool useEnd, params CodeMatch[] codeMatches)
+        {
+            var oldPos = codeMatcher.Pos;
+            var currentPos = codeMatcher.MatchForward(useEnd, codeMatches).Advance(useEnd ? 0 : -1).Pos;
+            codeMatcher.Advance(oldPos - currentPos);
+            codeMatcher.Nopify(currentPos - oldPos);
             return codeMatcher;
         }
     }

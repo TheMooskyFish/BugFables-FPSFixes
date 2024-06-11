@@ -17,7 +17,7 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Brfalse)
                 ).InsertAndAdvance(
                     new CodeInstruction(OpCodes.Ldloc_1),
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.AddDeltaTime), [typeof(float)])),
+                    Utils.AddDeltaTimeFloat,
                     new CodeInstruction(OpCodes.Stloc_1)
                 ).InstructionEnumeration();
             }

@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>FPSFixes</AssemblyName>
     <Company>Moosky's Projects</Company>
     <Description>Fixes Framerate Dependent</Description>
-    <Version>0.3.2</Version>
+    <Version>0.3.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>

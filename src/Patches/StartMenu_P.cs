@@ -15,4 +15,13 @@ namespace FPSFixes.Patches
             MainManager.instance.StartCoroutine(MainManager.SetText($"|size,0.45||halfline||color,4||font,0|FPS Fixes v{CorePlugin.Version}", new Vector3(-8.75f, y, 10f), menu1));
         }
     }
+    [HarmonyPatch(typeof(StartMenu), "Start")]
+    static class StartPatch // fixes bug caused by camera patches
+    {
+        static void Postfix(StartMenu __instance)
+        {
+            __instance.transform.localEulerAngles = Vector3.zero;
+            __instance.transform.localPosition = new Vector3(0f, -1f, 10f);
+        }
+    }
 }

@@ -6,6 +6,17 @@ namespace FPSFixes.Patches
 {
     class EntityControl_P
     {
+        [HarmonyPatch(typeof(EntityControl), "Start")]
+        static class InterpolateEntity
+        {
+            static void Postfix(EntityControl __instance)
+            {
+                if (__instance.playerentity)
+                {
+                    __instance.rigid.interpolation = RigidbodyInterpolation.Extrapolate; //change to Interpolate after fixing vi's fly
+                }
+            }
+        }
         [HarmonyPatch(typeof(EntityControl), "UpdateFlip")]
         static class UpdateFlipPatch
         {
@@ -56,9 +67,8 @@ namespace FPSFixes.Patches
                 return new CodeMatcher(instructions)
                 .MatchForward(false,
                     new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(MainManager), "framestep"))
-                )
-                .SetAndAdvance(OpCodes.Nop, null)
-                .Advance(1).Set(OpCodes.Call, AccessTools.Method(typeof(Utils), "AddDeltaTime", [typeof(float)]))
+                ).SetAndAdvance(OpCodes.Nop, null)
+                .Advance(1).SetInstruction(Utils.AddDeltaTimeFloat)
                 .InstructionEnumeration();
             }
         }
