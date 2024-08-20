@@ -2,6 +2,7 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
+
 namespace FPSFixes.Patches
 {
     class EntityControl_P
@@ -13,7 +14,7 @@ namespace FPSFixes.Patches
             {
                 if (__instance.playerentity)
                 {
-                    __instance.rigid.interpolation = RigidbodyInterpolation.Extrapolate; //change to Interpolate after fixing vi's fly
+                    __instance.rigid.interpolation = RigidbodyInterpolation.Interpolate;
                 }
             }
         }
@@ -50,11 +51,7 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Ldfld),
                     new CodeMatch(OpCodes.Ret)
                 )
-                .Insert(
-                    new CodeInstruction(OpCodes.Ldc_R4, (float)60),
-                    new CodeInstruction(OpCodes.Mul),
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Time), "get_deltaTime")),
-                    new CodeInstruction(OpCodes.Mul))
+                .AddCustomDeltaTime(60f, 0, false, false)
                 .InstructionEnumeration();
             }
         }
@@ -67,22 +64,20 @@ namespace FPSFixes.Patches
                 return new CodeMatcher(instructions)
                 .MatchForward(false,
                     new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(MainManager), "framestep"))
-                ).SetAndAdvance(OpCodes.Nop, null)
-                .Advance(1).SetInstruction(Utils.AddDeltaTimeFloat)
+                ).Nopify(0)
+                .AddCustomDeltaTime(50f, 1, false, false)
+                .Nopify(0)
                 .InstructionEnumeration();
             }
         }
         [HarmonyPatch(typeof(EntityControl))]
-        [HarmonyPatch("ShakeSprite", new[] { typeof(Vector3), typeof(float) })]
+        [HarmonyPatch("ShakeSprite", [typeof(Vector3), typeof(float)])]
         static class ShakeSpritePatch
         {
             [HarmonyPostfix]
-            static void Post(EntityControl __instance, Vector3 ___extraoffset)
+            static void Patch(EntityControl __instance, Vector3 ___extraoffset)
             {
-                if (CorePlugin.ToggleFixShakeSprite.Value)
-                {
-                    __instance.spritetransform.localPosition = Vector3.zero + ___extraoffset;
-                }
+                __instance.spritetransform.localPosition = Vector3.zero + ___extraoffset;
             }
         }
     }

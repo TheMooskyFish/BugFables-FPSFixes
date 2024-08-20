@@ -5,7 +5,7 @@
     <AssemblyName>FPSFixes</AssemblyName>
     <Company>Moosky's Projects</Company>
     <Description>Fixes Framerate Dependent</Description>
-    <Version>0.3.3</Version>
+    <Version>0.3.3.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -25,7 +25,8 @@
 
   <Target Name="copy" AfterTargets="Build" Condition="exists('$(BUGFABLES)')">
     <Message Text="Copying to Game's Plugins Folder" Importance="High" />
-  	<Copy SourceFiles="bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).dll" DestinationFolder="$(BUGFABLES)\BepInEx\plugins" />
+  	<Copy SourceFiles="bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).dll" DestinationFolder="$(BUGFABLES)\BepInEx\plugins\FPSFixes" />
+    <Copy SourceFiles="bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).pdb" DestinationFolder="$(BUGFABLES)\BepInEx\plugins\FPSFixes" />
   </Target>
 
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

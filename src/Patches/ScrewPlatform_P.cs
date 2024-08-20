@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
+
 namespace FPSFixes.Patches
 {
     class ScrewPlatform_P
@@ -16,8 +17,9 @@ namespace FPSFixes.Patches
                     new CodeMatch(OpCodes.Ldloc_0),
                     new CodeMatch(OpCodes.Brfalse)
                 ).InsertAndAdvance(
-                    new CodeInstruction(OpCodes.Ldloc_1),
-                    Utils.AddDeltaTimeFloat,
+                    new CodeInstruction(OpCodes.Ldloc_1)
+                ).AddCustomDeltaTime(60f, 0, false, false)
+                .InsertAndAdvance(
                     new CodeInstruction(OpCodes.Stloc_1)
                 ).InstructionEnumeration();
             }
