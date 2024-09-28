@@ -79,6 +79,15 @@ namespace FPSFixes.Patches
                     MainManager.instance.RefreshCamera();
                 }
             }
+            [HarmonyPatch(nameof(MainManager.ResetCamera), [typeof(bool)])]
+            [HarmonyTranspiler]
+            static IEnumerable<CodeInstruction> ResetCameraPatch(IEnumerable<CodeInstruction> instructions)
+            {
+                return new CodeMatcher(instructions)
+                .MatchForward(false,
+                    new CodeMatch(OpCodes.Ldc_R4, 1f)
+                ).SetOperandAndAdvance(10f).InstructionEnumeration();
+            }
             [HarmonyPatch(nameof(MainManager.RefreshCamera))]
             [HarmonyTranspiler] //adds deltatime to all camspeed
             static IEnumerable<CodeInstruction> Patch3(IEnumerable<CodeInstruction> instructions)
