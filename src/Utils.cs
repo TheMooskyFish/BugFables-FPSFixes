@@ -59,6 +59,7 @@ namespace FPSFixes
         }
         public static void ChangeInterpolation(EntityControl entity, bool mode)
         {
+            if (entity is null) return;
             entity.rigid.interpolation = mode ? RigidbodyInterpolation.Interpolate : RigidbodyInterpolation.None;
         }
         public static CodeMatcher Nopify(this CodeMatcher codeMatcher, int instsnumber)

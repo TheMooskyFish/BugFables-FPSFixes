@@ -12,7 +12,7 @@ namespace FPSFixes.Patches
         {
             static void Postfix(EntityControl __instance)
             {
-                if (__instance.playerentity)
+                if (__instance.playerentity && !__instance.battle)
                 {
                     __instance.rigid.interpolation = RigidbodyInterpolation.Interpolate;
                 }
