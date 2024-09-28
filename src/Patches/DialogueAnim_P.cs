@@ -7,11 +7,13 @@ namespace FPSFixes.Patches
     class DialogueAnim_P
     {
         [HarmonyPatch("FixedUpdate"), HarmonyPrefix]
-        static bool DisableUpdate(DialogueAnim __instance)
+        static void DisableUpdate(DialogueAnim __instance)
         {
             if (!__instance.GetComponent<AnimUpdate>())
+            {
                 __instance.gameObject.AddComponent<AnimUpdate>().dialogueAnim = __instance;
-            return false;
+                __instance.enabled = false;
+            }
         }
         class AnimUpdate : MonoBehaviour
         {
