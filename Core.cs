@@ -33,34 +33,50 @@ namespace FPSFixes
             ToggleUpdateCheck = Config.Bind("Update Checker", "Toggle Update Checker", true, "");
         }
 
-        //[HarmonyPatch(typeof(MainManager), "SetVariables")]
-        //public class SetVariablesPatch
-        //{
-        //    static void Postfix()
-        //    {
-        //        if (!MainManager.instance.GetComponent<FPSText>())
-        //            MainManager.instance.gameObject.AddComponent<FPSText>();
-        //    }
-        //}
+        internal bool mode = false;
+        public void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                if (MainManager.map?.chompy)
+                    Utils.ChangeInterpolation(MainManager.map?.chompy, mode);
+                foreach (var plr in MainManager.instance.playerdata)
+                    Utils.ChangeInterpolation(plr.entity, mode);
+                mode = !mode;
+            }
+        }
+#if DEBUG
+        [HarmonyPatch(typeof(MainManager), "SetVariables")]
+        public class SetVariablesPatch
+        {
+            static void Postfix()
+            {
+                if (true)
+                {
+                    if (!MainManager.instance.GetComponent<FPSText>())
+                        MainManager.instance.gameObject.AddComponent<FPSText>();
+                }
+            }
+        }
     }
-    //public class FPSText : MonoBehaviour
-    //{
-    //    public static DynamicFont FPS;
-    //    public void Awake()
-    //    {
-    //        if (FPS == null)
-    //            FPS = DynamicFont.SetUp(true, 1, 2, 100, new Vector2(0.5f, 0.5f), MainManager.GUICamera.transform, new Vector3(-8.9f, 4.65f, 1f));
-    //        FPS.name = "FPSText";
-    //        StartCoroutine(UpdateFPS());
-    //    }
-    //    public IEnumerator UpdateFPS()
-    //    {
-    //        while (true)
-    //        {
-    //            FPS.text = $"FPS: {Mathf.Round(1f / Time.unscaledDeltaTime)}";
-    //            yield return new WaitForSecondsRealtime(0.25f);
-    //        }
-    //
-    //    }
-    //}
+    public class FPSText : MonoBehaviour
+    {
+        public static DynamicFont FPS;
+        public void Awake()
+        {
+            if (FPS == null)
+                FPS = DynamicFont.SetUp(true, 1, 2, 100, new Vector2(0.5f, 0.5f), MainManager.GUICamera.transform, new Vector3(-8.9f, 4.65f, 1f));
+            FPS.name = "FPSText";
+            StartCoroutine(UpdateFPS());
+        }
+        public IEnumerator UpdateFPS()
+        {
+            while (true)
+            {
+                FPS.text = $"FPS: {Mathf.Round(1f / Time.unscaledDeltaTime)}";
+                yield return new WaitForSecondsRealtime(0.25f);
+            }
+        }
+#endif
+    }
 }
