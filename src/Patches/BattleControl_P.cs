@@ -41,5 +41,32 @@ namespace FPSFixes.Patches
             ).AddCustomDeltaTime(60f, 1, false, false); // end of counter type 1 and 2
             return CodeMatcher.InstructionEnumeration();
         }
+        [HarmonyPatch(nameof(BattleControl.UpdateRotation)), HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> UpdateRotationPatch(IEnumerable<CodeInstruction> instructions)
+        {
+            var CodeMatcher = new CodeMatcher(instructions);
+            CodeMatcher.MatchForward(false,
+                new CodeMatch(OpCodes.Ldc_R4, 0.2f)
+            ).AddCustomDeltaTime(50f, 1, false, false);
+            return CodeMatcher.InstructionEnumeration();
+        }
+        [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> RemoveVinesRotationScale(IEnumerable<CodeInstruction> instructions)
+        {
+            var CodeMatcher = new CodeMatcher(instructions);
+            CodeMatcher.MatchForward(false,
+                new CodeMatch(OpCodes.Ldarg_0),
+                new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), nameof(BattleControl.currentaction)))
+            ).MatchThenNopify(false,
+                new CodeMatch(OpCodes.Ldarg_0),
+                new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), nameof(BattleControl.enemy)))
+            );
+            return CodeMatcher.InstructionEnumeration();
+        }
+        [HarmonyPatch(nameof(BattleControl.LateUpdate)), HarmonyPrefix]
+        static void LateUpdatePatch(BattleControl __instance)
+        {
+            Utils.UpdateVines(__instance);
+        }
     }
 }

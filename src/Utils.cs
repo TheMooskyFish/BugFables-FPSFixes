@@ -57,6 +57,30 @@ namespace FPSFixes
                 return 0.0275f;
             return speed;
         }
+
+        public static void UpdateVines(BattleControl battle)
+        {
+            if (MainManager.instance.inbattle && MainManager.pausemenu == null && battle.choicevine != null)
+            {
+                var childs = battle.choicevine.GetChild(0);
+                if (battle.currentaction == BattleControl.Pick.BaseAction)
+                {
+                    battle.UpdateRotation(battle.option);
+                    foreach (Transform child in childs)
+                        child.localScale = Vector3.Lerp(child.localScale, Vector3.one * 2.5f, AddDeltaTime(0.15f, 50f, false));
+                }
+                else
+                {
+                    battle.UpdateRotation(battle.lastoption);
+                    foreach (Transform child in childs)
+                        if (battle.lastoption == child.GetSiblingIndex())
+                            child.localScale = Vector3.Lerp(child.localScale, new Vector3(2.5f, (battle.currentaction == BattleControl.Pick.SelectPlayer) ? 2f : 2.5f, 2.5f), AddDeltaTime(0.15f, 50f, false));
+                        else
+                            child.localScale = Vector3.Lerp(child.localScale, new Vector3(2.5f, 1.5f, 2.5f), AddDeltaTime(0.15f, 50f, false));
+                }
+            }
+        }
+
         public static void ChangeInterpolation(EntityControl entity, bool mode)
         {
             if (entity == null) return;
