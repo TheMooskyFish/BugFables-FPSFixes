@@ -5,10 +5,10 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(NPCControl))]
-    class NPCControl_P
+    internal class NPCControl_P
     {
         [HarmonyPatch("Update"), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> SavePoint(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> SavePoint(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
             .MatchForward(true,
@@ -23,7 +23,7 @@ namespace FPSFixes.Patches
             .InstructionEnumeration();
         }
         [HarmonyPatch("Update"), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> GeizerPatch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> GeizerPatch(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
             .MatchForward(true,
@@ -40,10 +40,10 @@ namespace FPSFixes.Patches
             .InstructionEnumeration();
         }
         [HarmonyPatch(typeof(NPCControl))]
-        static class PushableIceCube
+        private static class PushableIceCube
         {
             [HarmonyPatch("FixedUpdate"), HarmonyPrefix]
-            static void FixedUpdatePos(NPCControl __instance)
+            private static void FixedUpdatePos(NPCControl __instance)
             {
                 if (MainManager.instance.pause || MainManager.instance.minipause) return;
                 if (__instance.objecttype == NPCControl.ObjectTypes.PushRock && __instance.data.Length == 3 && __instance.hit)
@@ -53,7 +53,7 @@ namespace FPSFixes.Patches
                 }
             }
             [HarmonyPatch("Update"), HarmonyTranspiler]
-            static IEnumerable<CodeInstruction> RemoveUpdatePos(IEnumerable<CodeInstruction> instructions)
+            private static IEnumerable<CodeInstruction> RemoveUpdatePos(IEnumerable<CodeInstruction> instructions)
             {
                 var codematcher = new CodeMatcher(instructions);
                 codematcher.MatchForward(false,

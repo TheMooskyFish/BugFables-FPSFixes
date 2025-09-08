@@ -6,32 +6,32 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 namespace FPSFixes
-{
-    public class UpdateChecker
+{   
+    internal static class UpdateChecker
     {
         [Serializable]
-        private class GHRelease
+        private class GhRelease
         {
-            public string tag_name = null;
+            public string tag_name = string.Empty;
         }
-        private const string _url = "https://api.github.com/repos/TheMooskyFish/BugFables-FPSFixes/releases/latest";
-        public IEnumerator CheckUpdate()
+        private const string URL = "https://api.github.com/repos/TheMooskyFish/BugFables-FPSFixes/releases/latest";
+        internal static IEnumerator CheckUpdate()
         {
-            var web = UnityWebRequest.Get(_url);
+            var web = UnityWebRequest.Get(URL);
             yield return web.SendWebRequest();
             if (web.isNetworkError || web.isHttpError)
             {
                 CorePlugin.Logger.LogError(web.error);
                 yield break;
             }
-            var jsondata = JsonUtility.FromJson<GHRelease>(Encoding.UTF8.GetString(web.downloadHandler.GetData()));
-            if (jsondata.tag_name is null)
+            var data = JsonUtility.FromJson<GhRelease>(Encoding.UTF8.GetString(web.downloadHandler.GetData()));
+            if (data.tag_name is null)
                 yield break;
             var pluginVersion = MetadataHelper.GetMetadata(typeof(CorePlugin)).Version;
-            var ghVersion = new Version(jsondata.tag_name.Substring(1));
+            var ghVersion = new Version(data.tag_name.Substring(1));
             if (pluginVersion < ghVersion)
             {
-                CorePlugin.Version += $" - Update Available: {jsondata.tag_name}";
+                CorePlugin.Version += $" - Update Available: {data.tag_name}";
             }
             yield return null;
         }

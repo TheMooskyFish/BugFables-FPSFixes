@@ -6,65 +6,61 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(BattleControl))]
-    class BattleControl_P
+    internal class BattleControl_P
     {
         [HarmonyPatch(nameof(BattleControl.CounterAnimation), MethodType.Enumerator), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> CounterAnimation_Patch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> CounterAnimation_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            var CodeMatcher = new CodeMatcher(instructions);
-            CodeMatcher.MatchForward(false, //counter type 0 - adding deltatime to rotate
+            var codeMatcher = new CodeMatcher(instructions);
+            codeMatcher.MatchForward(false, //counter type 0 - adding deltatime to rotate
                 new CodeMatch(OpCodes.Ldc_I4, 360)
             );
             for (var i = 0; i < 4; i++)
             {
-                CodeMatcher.MatchForward(false,
+                codeMatcher.MatchForward(false,
                     new CodeMatch(OpCodes.Ldc_R4),
                     new CodeMatch(OpCodes.Newobj),
                     new CodeMatch(OpCodes.Callvirt)
                 ).AddCustomDeltaTime(60f, 1, false, false);
-                CodeMatcher.Advance(3);
+                codeMatcher.Advance(3);
             } // end of counter type 0
-            CodeMatcher.MatchForward(false, //counter type 1 and 2 - adding deltatime to position and last rotate
+            codeMatcher.MatchForward(false, //counter type 1 and 2 - adding deltatime to position and last rotate
                 new CodeMatch(OpCodes.Ldarg_0),
                 new CodeMatch(OpCodes.Ldnull)
             );
             for (var i = 0; i < 3; i++)
             {
-                CodeMatcher.MatchForward(false,
+                codeMatcher.MatchForward(false,
                     new CodeMatch(OpCodes.Ldc_R4),
                     new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(Vector3), nameof(Vector3.Lerp)))
                 ).AddCustomDeltaTime(60f, 1, false, false);
             }
-            CodeMatcher.MatchForward(true,
+            codeMatcher.MatchForward(true,
                 new CodeMatch(OpCodes.Ldc_R4, 0f),
                 new CodeMatch(OpCodes.Ldc_R4, 10f)
             ).AddCustomDeltaTime(60f, 1, false, false); // end of counter type 1 and 2
-            return CodeMatcher.InstructionEnumeration();
+            return codeMatcher.InstructionEnumeration();
         }
         [HarmonyPatch(nameof(BattleControl.UpdateRotation)), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> UpdateRotationPatch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> UpdateRotationPatch(IEnumerable<CodeInstruction> instructions)
         {
-            var CodeMatcher = new CodeMatcher(instructions);
-            CodeMatcher.MatchForward(false,
+            return new CodeMatcher(instructions).MatchForward(false,
                 new CodeMatch(OpCodes.Ldc_R4, 0.2f)
-            ).AddCustomDeltaTime(50f, 1, false, false);
-            return CodeMatcher.InstructionEnumeration();
+            ).AddCustomDeltaTime(50f, 1, false, false).InstructionEnumeration();
         }
         [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RemoveVinesRotationScale(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> RemoveVinesRotationScale(IEnumerable<CodeInstruction> instructions)
         {
-            var CodeMatcher = new CodeMatcher(instructions);
-            CodeMatcher.MatchForward(false,
+            return new CodeMatcher(instructions).MatchForward(false,
                 new CodeMatch(OpCodes.Ldarg_0),
                 new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), nameof(BattleControl.currentaction)))
             ).MatchThenNopify(false,
                 new CodeMatch(OpCodes.Ldarg_0),
                 new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), nameof(BattleControl.enemy)))
-            );
-            return CodeMatcher.InstructionEnumeration();
+            ).InstructionEnumeration();
         }
         [HarmonyPatch(nameof(BattleControl.LateUpdate)), HarmonyPrefix]
-        static void LateUpdatePatch(BattleControl __instance)
+        private static void LateUpdatePatch(BattleControl __instance)
         {
             Utils.UpdateVines(__instance);
         }

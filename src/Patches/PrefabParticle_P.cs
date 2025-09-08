@@ -5,13 +5,13 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(PrefabParticle))]
-    class PrefabParticle_P
+    internal class PrefabParticle_P
     {
         [HarmonyPatch("LateUpdate"), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> UpdatePatch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> UpdatePatch(IEnumerable<CodeInstruction> instructions)
         {
-            var CodeMatcher = new CodeMatcher(instructions);
-            CodeMatcher.MatchForward(false,
+            return new CodeMatcher(instructions)
+            .MatchForward(false,
                 new CodeMatch(OpCodes.Ldc_R4, 1f)
             ).AddCustomDeltaTime(60f, 1, false, false)
             .MatchForward(false,
@@ -20,8 +20,8 @@ namespace FPSFixes.Patches
             ).AddCustomDeltaTime(60f, 1, true, false)
             .MatchForward(false,
                 new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(PrefabParticle), nameof(PrefabParticle.speed)))
-            ).AddCustomDeltaTime(60f, 1, false, false);
-            return CodeMatcher.InstructionEnumeration();
+            ).AddCustomDeltaTime(60f, 1, false, false)
+            .InstructionEnumeration();
         }
     }
 }

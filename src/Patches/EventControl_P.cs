@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(EventControl))]
-    class EventControl_P
+    internal class EventControl_P
     {
         //[HarmonyPatch(nameof(EventControl.Event68)), HarmonyPrefix]
         //static void Event68Patch()
@@ -27,11 +27,11 @@ namespace FPSFixes.Patches
         //            return;
         //    }
         //}
-        internal static int[] safeEvents = [85, 200]; //TODO: check more events
+        private static readonly int[] s_safeEvents = [85, 200]; //TODO: check more events
         [HarmonyPatch(nameof(EventControl.StartEvent)), HarmonyPostfix]
-        static void StartEventPatch()
+        private static void StartEventPatch()
         {
-            var safeEventCheck = safeEvents.Contains(MainManager.lastevent);
+            var safeEventCheck = s_safeEvents.Contains(MainManager.lastevent);
             CorePlugin.Logger.LogInfo($"Start Event: {MainManager.lastevent} - Safe Event Check: {safeEventCheck}");
             if (safeEventCheck) return;
             if (MainManager.map?.chompy)
@@ -39,10 +39,10 @@ namespace FPSFixes.Patches
             foreach (var plr in MainManager.instance.playerdata)
                 Utils.ChangeInterpolation(plr.entity, false);
         }
-        [HarmonyPatch(nameof(EventControl.EndEvent), [typeof(bool)]), HarmonyPostfix]
-        static void EndEventPatch()
+        [HarmonyPatch(nameof(EventControl.EndEvent), typeof(bool)), HarmonyPostfix]
+        private static void EndEventPatch()
         {
-            var safeEventCheck = safeEvents.Contains(MainManager.lastevent);
+            var safeEventCheck = s_safeEvents.Contains(MainManager.lastevent);
             CorePlugin.Logger.LogInfo($"End Event: {MainManager.lastevent} - Safe Event Check: {safeEventCheck}");
             if (MainManager.map?.chompy)
                 Utils.ChangeInterpolation(MainManager.map?.chompy, true);

@@ -9,23 +9,22 @@ namespace FPSFixes
     {
         public static float AddDeltaTime(float number, float fps, bool smooth)
         {
-            if (CorePlugin.ToggledeltaTime.Value)
-            {
-                var delta = smooth ? Time.smoothDeltaTime : Time.deltaTime;
-                return number * fps * delta;
-            }
-            return number;
+            //if (CorePlugin.ToggledeltaTime.Value)
+            //{
+            var delta = smooth ? Time.smoothDeltaTime : Time.deltaTime;
+            return number * fps * delta;
+            //}
+            //return number;
         }
         public static Vector3 AddDeltaTime(Vector3 vector, float fps, bool smooth)
         {
-            if (CorePlugin.ToggledeltaTime.Value)
-            {
-                var delta = smooth ? Time.smoothDeltaTime : Time.deltaTime;
-                vector.x = vector.x * fps * delta;
-                vector.y = vector.y * fps * delta;
-                vector.z = vector.z * fps * delta;
-                return vector;
-            }
+            //if (CorePlugin.ToggledeltaTime.Value)
+            //{
+            var delta = smooth ? Time.smoothDeltaTime : Time.deltaTime;
+            vector.x = vector.x * fps * delta;
+            vector.y = vector.y * fps * delta;
+            vector.z = vector.z * fps * delta;
+            //}
             return vector;
         }
         public static CodeMatcher AddCustomDeltaTime(this CodeMatcher codeMatcher, float fps, int advance, bool vector, bool smooth)
@@ -47,15 +46,11 @@ namespace FPSFixes
         }
         public static float ViFly(PlayerControl plr)
         {
-            if (plr.transform.position.y < plr.startheight.Value + 0.99f)
-                return 1.25f;
-            return 0f;
+            return plr.transform.position.y < plr.startheight!.Value + 0.99f ? 1.25f : 0f;
         }
         public static float DialogueSpeed(float speed)
         {
-            if (speed == 0.02f)
-                return 0.0275f;
-            return speed;
+            return speed == 0.02f ? 0.0275f : speed;
         }
 
         public static void UpdateVines(BattleControl battle)
@@ -74,7 +69,7 @@ namespace FPSFixes
                     battle.UpdateRotation(battle.lastoption);
                     foreach (Transform child in childs)
                         if (battle.lastoption == child.GetSiblingIndex())
-                            child.localScale = Vector3.Lerp(child.localScale, new Vector3(2.5f, (battle.currentaction == BattleControl.Pick.SelectPlayer) ? 2f : 2.5f, 2.5f), AddDeltaTime(0.15f, 50f, false));
+                            child.localScale = Vector3.Lerp(child.localScale, new Vector3(2.5f, battle.currentaction == BattleControl.Pick.SelectPlayer ? 2f : 2.5f, 2.5f), AddDeltaTime(0.15f, 50f, false));
                         else
                             child.localScale = Vector3.Lerp(child.localScale, new Vector3(2.5f, 1.5f, 2.5f), AddDeltaTime(0.15f, 50f, false));
                 }
@@ -83,7 +78,7 @@ namespace FPSFixes
 
         public static void ChangeInterpolation(EntityControl entity, bool mode)
         {
-            if (entity == null) return;
+            if (!entity) return;
             entity.rigid.interpolation = mode ? RigidbodyInterpolation.Interpolate : RigidbodyInterpolation.None;
         }
         public static CodeMatcher Nopify(this CodeMatcher codeMatcher, int instsnumber)

@@ -5,10 +5,10 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(PlayerControl))]
-    class PlayerControl_P
+    internal class PlayerControl_P
     {
         [HarmonyPatch(nameof(PlayerControl.DoActionHold)), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> PlayerActionHold(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> PlayerActionHold(IEnumerable<CodeInstruction> instructions)
         {
             var entity = AccessTools.Field(typeof(PlayerControl), nameof(PlayerControl.entity));
             return new CodeMatcher(instructions)
@@ -27,7 +27,7 @@ namespace FPSFixes.Patches
             ).InstructionEnumeration();
         }
         [HarmonyPatch(nameof(PlayerControl.LateUpdate)), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> ViFly(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> ViFly(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
             .MatchForward(false,

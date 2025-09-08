@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace FPSFixes.Patches
 {
-    class StartMenu_P
+    internal class StartMenu_P
     {
         [HarmonyPatch(typeof(StartMenu), "SetMenuText")]
-        static class StartMenuVersion
+        private static class StartMenuVersion
         {
-            static void Postfix(StartMenu __instance)
+            private static void Postfix(StartMenu __instance)
             {
                 if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dev.mooskyfish.modlist"))
                     return;
@@ -18,9 +18,9 @@ namespace FPSFixes.Patches
             }
         }
         [HarmonyPatch(typeof(StartMenu), "Start")]
-        static class StartPatch // fixes bug caused by camera patches
+        private static class StartPatch // fixes bug caused by camera patches
         {
-            static void Postfix(StartMenu __instance)
+            private static void Postfix(StartMenu __instance)
             {
                 __instance.transform.localEulerAngles = Vector3.zero;
                 __instance.transform.localPosition = new Vector3(0f, -1f, 10f);

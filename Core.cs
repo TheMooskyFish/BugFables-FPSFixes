@@ -7,73 +7,70 @@ using UnityEngine;
 
 namespace FPSFixes
 {
-    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3.4")]
+    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3.4.1")]
     [BepInProcess("Bug Fables.exe")]
     public class CorePlugin : BaseUnityPlugin
     {
-        public static new ManualLogSource Logger;
+        public new static ManualLogSource Logger;
         public static string Version = MetadataHelper.GetMetadata(typeof(CorePlugin)).Version.ToString();
-        internal static Harmony Harmony;
-        public static ConfigEntry<bool> ToggleCameraPatches;
-        public static ConfigEntry<bool> ToggledeltaTime;
-        public static ConfigEntry<bool> ToggleUpdateCheck;
+        private Harmony _harmony;
+        //public static ConfigEntry<bool> ToggleCameraPatches;
+        //public static ConfigEntry<bool> ToggledeltaTime;
+        private ConfigEntry<bool> _toggleUpdateCheck;
 
         public void Awake()
         {
             Logger = base.Logger;
-            Harmony = new Harmony("dev.mooskyfish.FPSFixes");
+            _harmony = new Harmony("dev.mooskyfish.FPSFixes");
             SetUpConfig();
-            if (ToggleUpdateCheck.Value)
-                StartCoroutine(new UpdateChecker().CheckUpdate());
-            Harmony.PatchAll();
+            if (_toggleUpdateCheck.Value)
+                StartCoroutine(UpdateChecker.CheckUpdate());
+            _harmony.PatchAll();
         }
         private void SetUpConfig()
         {
-            ToggledeltaTime = Config.Bind("Patches", "Toggle deltaTime Patches", true, "");
-            ToggleUpdateCheck = Config.Bind("Update Checker", "Toggle Update Checker", true, "");
+            //ToggledeltaTime = Config.Bind("Patches", "Toggle deltaTime Patches", true, "");
+            _toggleUpdateCheck = Config.Bind("Update Checker", "Toggle Update Checker", true, "");
         }
-
-        internal bool mode = false;
+#if DEBUG
+        private bool _mode;
         public void Update()
         {
             if (Input.GetKeyDown(KeyCode.P))
             {
                 if (MainManager.map?.chompy)
-                    Utils.ChangeInterpolation(MainManager.map?.chompy, mode);
+                    Utils.ChangeInterpolation(MainManager.map?.chompy, _mode);
                 foreach (var plr in MainManager.instance.playerdata)
-                    Utils.ChangeInterpolation(plr.entity, mode);
-                mode = !mode;
+                    Utils.ChangeInterpolation(plr.entity, _mode);
+                _mode = !_mode;
             }
         }
-#if DEBUG
         [HarmonyPatch(typeof(MainManager), "SetVariables")]
-        public class SetVariablesPatch
+        private class SetVariablesPatch
         {
-            static void Postfix()
+            private static void Postfix()
             {
-                if (true)
-                {
-                    if (!MainManager.instance.GetComponent<FPSText>())
-                        MainManager.instance.gameObject.AddComponent<FPSText>();
-                }
+                if (!MainManager.instance.GetComponent<FPSText>())
+                    MainManager.instance.gameObject.AddComponent<FPSText>();
             }
         }
     }
     public class FPSText : MonoBehaviour
     {
-        public static DynamicFont FPS;
+        private DynamicFont _fps;
         public void Awake()
         {
-            if (FPS == null)
-                FPS = DynamicFont.SetUp(true, 1, 2, 100, new Vector2(0.5f, 0.5f), MainManager.GUICamera.transform, new Vector3(-8.9f, 4.65f, 1f));
-            FPS.name = "FPSText";
+            if (_fps == null)
+                _fps = DynamicFont.SetUp(true, 1, 2, 100, new Vector2(0.5f, 0.5f), MainManager.GUICamera.transform, new Vector3(-8.9f, 4.65f, 1f));
+            _fps.name = "FPSText";
             StartCoroutine(UpdateFPS());
         }
-        public IEnumerator UpdateFPS()
+
+        private IEnumerator UpdateFPS()
         {
             while (true)
             {
-                FPS.text = $"FPS: {Mathf.Round(1f / Time.unscaledDeltaTime)}";
+                _fps.text = $"FPS: {Mathf.Round(1f / Time.unscaledDeltaTime)}";
                 yield return new WaitForSecondsRealtime(0.25f);
             }
         }

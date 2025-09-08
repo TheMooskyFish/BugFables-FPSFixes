@@ -4,35 +4,36 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(DialogueAnim))]
-    class DialogueAnim_P
+    internal class DialogueAnim_P
     {
         [HarmonyPatch("FixedUpdate"), HarmonyPrefix]
-        static void DisableUpdate(DialogueAnim __instance)
+        private static bool DisableUpdate(DialogueAnim __instance)
         {
             if (!__instance.GetComponent<AnimUpdate>())
             {
-                __instance.gameObject.AddComponent<AnimUpdate>().dialogueAnim = __instance;
-                __instance.enabled = false;
+                __instance.gameObject.AddComponent<AnimUpdate>()._dialogueAnim = __instance;
             }
+            return false;
         }
-        class AnimUpdate : MonoBehaviour
+        private class AnimUpdate : MonoBehaviour
         {
-            internal DialogueAnim dialogueAnim;
+            internal DialogueAnim _dialogueAnim;
             public void Update()
             {
-                Vector3 vector = dialogueAnim.targetscale * dialogueAnim.multiplier;
+                if (!_dialogueAnim.enabled) return;
+                var vector = _dialogueAnim.targetscale * _dialogueAnim.multiplier;
 
-                if (dialogueAnim.flipx)
+                if (_dialogueAnim.flipx)
                     vector.x = 0f;
-                else if (dialogueAnim.flipy)
+                else if (_dialogueAnim.flipy)
                     vector.y = 0f;
-                else if (dialogueAnim.shrink)
+                else if (_dialogueAnim.shrink)
                     vector = Vector3.zero;
 
-                transform.localScale = Vector3.Lerp(transform.localScale, vector, dialogueAnim.shrinkspeed * 50f * Time.smoothDeltaTime);
+                transform.localScale = Vector3.Lerp(transform.localScale, vector, _dialogueAnim.shrinkspeed * 50f * Time.smoothDeltaTime);
 
-                if (dialogueAnim.targetpos != Vector3.zero)
-                    transform.localPosition = Vector3.Lerp(transform.localPosition, dialogueAnim.targetpos, dialogueAnim.speed * 50f * Time.smoothDeltaTime);
+                if (_dialogueAnim.targetpos != Vector3.zero)
+                    transform.localPosition = Vector3.Lerp(transform.localPosition, _dialogueAnim.targetpos, _dialogueAnim.speed * 50f * Time.smoothDeltaTime);
             }
         }
     }

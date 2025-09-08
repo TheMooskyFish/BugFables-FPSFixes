@@ -4,10 +4,10 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(FaceCamera))]
-    class FaceCamera_P
+    internal class FaceCamera_P
     {
         [HarmonyPatch("Start"), HarmonyPostfix]
-        static void Start(FaceCamera __instance)
+        private static void Start(FaceCamera __instance)
         {
             if (__instance.gameObject.name == "player") // only for mite knight
             {
@@ -15,7 +15,7 @@ namespace FPSFixes.Patches
                 __instance.enabled = false;
             }
         }
-        class FaceCameraUpdate : MonoBehaviour
+        private class FaceCameraUpdate : MonoBehaviour
         {
             internal FaceCamera FaceCamera;
             public void Update()

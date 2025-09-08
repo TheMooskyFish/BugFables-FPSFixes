@@ -5,10 +5,10 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(GroundDetector))]
-    class GroundDetector_P
+    internal class GroundDetector_P
     {
         [HarmonyPatch(nameof(GroundDetector.OnTriggerStay)), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> OnTriggerStayPatch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> OnTriggerStayPatch(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
             .MatchForward(true,
@@ -23,7 +23,7 @@ namespace FPSFixes.Patches
             ).InstructionEnumeration();
         }
         [HarmonyPatch(nameof(GroundDetector.OnTriggerExit)), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> OnTriggerExitPatch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> OnTriggerExitPatch(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
             .MatchForward(true,

@@ -7,10 +7,10 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(MainManager))]
-    class MainManager_P
+    internal class MainManager_P
     {
         [HarmonyPatch(nameof(MainManager.Transition), MethodType.Enumerator), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransitionPatch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> TransitionPatch(IEnumerable<CodeInstruction> instructions)
         {
             var CodeMatcher = new CodeMatcher(instructions);
             for (var i = 0; i < 2; i++)
@@ -22,7 +22,7 @@ namespace FPSFixes.Patches
             return CodeMatcher.InstructionEnumeration();
         }
         [HarmonyPatch(nameof(MainManager.DoClock)), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RemoveGCCollect(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> RemoveGCCollect(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
             .MatchForward(false,
@@ -35,7 +35,7 @@ namespace FPSFixes.Patches
         }
         [HarmonyPatch(nameof(MainManager.SetText), [typeof(string), typeof(int), typeof(float?), typeof(bool), typeof(bool), typeof(Vector3), typeof(Vector3), typeof(Vector2), typeof(Transform), typeof(NPCControl)])]
         [HarmonyPatch(MethodType.Enumerator), HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> DialogueSpeedPatch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> DialogueSpeedPatch(IEnumerable<CodeInstruction> instructions)
         {
             return new CodeMatcher(instructions)
             .MatchForward(false,
@@ -52,17 +52,17 @@ namespace FPSFixes.Patches
             .InstructionEnumeration();
         }
         [HarmonyPatch(nameof(MainManager.ApplySettings)), HarmonyPostfix]
-        static void VSyncPatch()
+        private static void VSyncPatch()
         {
             QualitySettings.vSyncCount = MainManager.vsync;
         }
         //Camera Patches
         [HarmonyPatch(typeof(MainManager))]
-        static class CameraPatch
+        private static class CameraPatch
         {
             [HarmonyPatch(nameof(MainManager.FixedUpdate))]
             [HarmonyPrefix]
-            static bool Patch1()
+            private static bool Patch1()
             {
                 if (MainManager.basicload)
                 {
@@ -72,7 +72,7 @@ namespace FPSFixes.Patches
             }
             [HarmonyPatch(nameof(MainManager.LateUpdate))]
             [HarmonyPostfix]
-            static void Patch2()
+            private static void Patch2()
             {
                 if (MainManager.basicload)
                 {
@@ -81,7 +81,7 @@ namespace FPSFixes.Patches
             }
             [HarmonyPatch(nameof(MainManager.ResetCamera), [typeof(bool)])]
             [HarmonyTranspiler]
-            static IEnumerable<CodeInstruction> ResetCameraPatch(IEnumerable<CodeInstruction> instructions)
+            private static IEnumerable<CodeInstruction> ResetCameraPatch(IEnumerable<CodeInstruction> instructions)
             {
                 return new CodeMatcher(instructions)
                 .MatchForward(false,
@@ -90,27 +90,28 @@ namespace FPSFixes.Patches
             }
             [HarmonyPatch(nameof(MainManager.RefreshCamera))]
             [HarmonyTranspiler] //adds deltatime to all camspeed
-            static IEnumerable<CodeInstruction> Patch3(IEnumerable<CodeInstruction> instructions)
+            private static IEnumerable<CodeInstruction> Patch3(IEnumerable<CodeInstruction> instructions)
             {
                 CorePlugin.Logger.LogInfo("Patching Camera");
-                var CodeMatcher = new CodeMatcher(instructions);
+                var codeMatcher = new CodeMatcher(instructions);
                 for (var i = 0; i < 7; i++)
                 {
-                    CodeMatcher.MatchForward(false,
+                    codeMatcher.MatchForward(false,
                         new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(MainManager), nameof(MainManager.camspeed)))
                     ).AddCustomDeltaTime(50f, 1, false, true).Advance(3);
-                };
-                CodeMatcher.MatchBack(false,
+                }
+
+                codeMatcher.MatchBack(false,
                     new CodeMatch(OpCodes.Ldloc_0))
                 .AddCustomDeltaTime(50f, 1, true, true)
                 .MatchForward(true,
                     new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(MainManager), nameof(MainManager.camanglespeed))),
                     new CodeMatch(OpCodes.Stloc_2)
                 ).Advance(1).Insert(
-                    new CodeInstruction(OpCodes.Ldloc_2, null),
-                    new CodeInstruction(OpCodes.Stloc_2, null)
+                    new CodeInstruction(OpCodes.Ldloc_2),
+                    new CodeInstruction(OpCodes.Stloc_2)
                 ).AddCustomDeltaTime(50f, 1, false, true);
-                return CodeMatcher.InstructionEnumeration();
+                return codeMatcher.InstructionEnumeration();
             }
         }
     }
