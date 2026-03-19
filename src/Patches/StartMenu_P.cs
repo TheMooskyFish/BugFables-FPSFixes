@@ -16,7 +16,7 @@ namespace FPSFixes.Patches
                 MainManager.instance.StartCoroutine(
                     MainManager.SetText(
                         $"|size,0.45||halfline||color,4||font,0|FPS Fixes v{CorePlugin.Version}",
-                        new Vector3(6.4f, -3.55f, 10f),
+                        new Vector3(-8.75f, 5.9f, 10f),
                         menu1));
             }
         }
