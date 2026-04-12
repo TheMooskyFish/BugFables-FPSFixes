@@ -9,7 +9,7 @@ namespace FPSFixes.Patches
     internal class BattleControl_P
     {
         [HarmonyPatch(nameof(BattleControl.CounterAnimation), MethodType.Enumerator), HarmonyTranspiler]
-        private static IEnumerable<CodeInstruction> CounterAnimation_Patch(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> CounterAnimationPatch(IEnumerable<CodeInstruction> instructions)
         {
             var codeMatcher = new CodeMatcher(instructions);
             codeMatcher.MatchForward(false, //counter type 0 - adding deltatime to rotate
@@ -86,6 +86,21 @@ namespace FPSFixes.Patches
                                 Utils.AddDeltaTime(0.15f, 50f, false));
                 }
             }
+        }
+        [HarmonyPatch(nameof(BattleControl.DoCommand), MethodType.Enumerator), HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> RemoveTieFrameRateForBarFill(IEnumerable<CodeInstruction> instructions)
+        {
+            return new CodeMatcher(instructions).MatchForward(false,
+                    new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(MainManager), nameof(MainManager.vsync))),
+                    new CodeMatch(OpCodes.Brtrue))
+                .SetOpcodeAndAdvance(OpCodes.Ldc_I4_1)
+                .SetOpcodeAndAdvance(OpCodes.Brfalse_S).MatchForward(false,
+                    new CodeMatch(Transpilers.EmitDelegate(MainManager.TieFramerate)))
+                .Nopify(0).MatchForward(false,
+                    new CodeMatch(OpCodes.Call,
+                        AccessTools.PropertyGetter(typeof(Application), nameof(Application.targetFrameRate))))
+                .MatchThenNopify(true, new CodeMatch(OpCodes.Mul))
+                .InstructionEnumeration();
         }
     }
 }
