@@ -62,7 +62,30 @@ namespace FPSFixes.Patches
         [HarmonyPatch(nameof(BattleControl.LateUpdate)), HarmonyPrefix]
         private static void LateUpdatePatch(BattleControl __instance)
         {
-            Utils.UpdateVines(__instance);
+            if (MainManager.instance.inbattle && MainManager.pausemenu == null && __instance.choicevine != null)
+            {
+                Transform children = __instance.choicevine.GetChild(0);
+                if (__instance.currentaction == BattleControl.Pick.BaseAction)
+                {
+                    __instance.UpdateRotation(__instance.option);
+                    foreach (Transform child in children)
+                        child.localScale = Vector3.Lerp(child.localScale, Vector3.one * 2.5f, 
+                            Utils.AddDeltaTime(0.15f, 50f, false));
+                }
+                else
+                {
+                    __instance.UpdateRotation(__instance.lastoption);
+                    foreach (Transform child in children)
+                        if (__instance.lastoption == child.GetSiblingIndex())
+                            child.localScale = Vector3.Lerp(
+                                child.localScale, 
+                                new Vector3(2.5f, __instance.currentaction == BattleControl.Pick.SelectPlayer ? 2f : 2.5f, 2.5f),
+                                Utils.AddDeltaTime(0.15f, 50f, false));
+                        else
+                            child.localScale = Vector3.Lerp(child.localScale, new Vector3(2.5f, 1.5f, 2.5f), 
+                                Utils.AddDeltaTime(0.15f, 50f, false));
+                }
+            }
         }
     }
 }
