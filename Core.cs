@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace FPSFixes
 {
-    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3.4.1")]
+    [BepInPlugin("dev.mooskyfish.FPSFixes", "FPS Fixes", "0.3.5")]
     [BepInProcess("Bug Fables.exe")]
     public class CorePlugin : BaseUnityPlugin
     {
