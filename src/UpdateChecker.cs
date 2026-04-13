@@ -28,7 +28,7 @@ namespace FPSFixes
             if (data.tag_name is null)
                 yield break;
             var pluginVersion = MetadataHelper.GetMetadata(typeof(CorePlugin)).Version;
-            var ghVersion = new Version(data.tag_name.Substring(1));
+            var ghVersion = new System.Version(data.tag_name.Substring(1));
             if (pluginVersion < ghVersion)
             {
                 CorePlugin.Version += $" - Update Available: {data.tag_name}";

@@ -14,8 +14,6 @@ namespace FPSFixes
         public new static ManualLogSource Logger;
         public static string Version = MetadataHelper.GetMetadata(typeof(CorePlugin)).Version.ToString();
         private Harmony _harmony;
-        //public static ConfigEntry<bool> ToggleCameraPatches;
-        //public static ConfigEntry<bool> ToggledeltaTime;
         private ConfigEntry<bool> _toggleUpdateCheck;
 
         public void Awake()
@@ -29,22 +27,9 @@ namespace FPSFixes
         }
         private void SetUpConfig()
         {
-            //ToggledeltaTime = Config.Bind("Patches", "Toggle deltaTime Patches", true, "");
             _toggleUpdateCheck = Config.Bind("Update Checker", "Toggle Update Checker", true, "");
         }
 #if DEBUG
-        private bool _mode;
-        public void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                if (MainManager.map?.chompy)
-                    Utils.ChangeInterpolation(MainManager.map?.chompy, _mode);
-                foreach (var plr in MainManager.instance.playerdata)
-                    Utils.ChangeInterpolation(plr.entity, _mode);
-                _mode = !_mode;
-            }
-        }
         [HarmonyPatch(typeof(MainManager), "SetVariables")]
         private class SetVariablesPatch
         {
@@ -65,7 +50,18 @@ namespace FPSFixes
             _fps.name = "FPSText";
             StartCoroutine(UpdateFPS());
         }
-
+        private bool _mode;
+        public void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                if (MainManager.map?.chompy)
+                    Utils.ChangeInterpolation(MainManager.map?.chompy, _mode);
+                foreach (var plr in MainManager.instance.playerdata)
+                    Utils.ChangeInterpolation(plr.entity, _mode);
+                _mode = !_mode;
+            }
+        }
         private IEnumerator UpdateFPS()
         {
             while (true)

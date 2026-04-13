@@ -1,32 +1,29 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
+using System.Reflection;
 using UnityEngine;
 
 namespace FPSFixes.Patches
 {
+    [HarmonyPatch(typeof(EntityControl))]
     internal class EntityControlPatches
     {
-        [HarmonyPatch(typeof(EntityControl), "Start")]
-        private class InterpolateEntity
+        [HarmonyPatch(nameof(EntityControl.Start)), HarmonyPostfix]
+        private static void InterpolateEntity(EntityControl __instance)
         {
-            private static void Postfix(EntityControl __instance)
+            if (__instance.playerentity && !__instance.battle)
             {
-                if (__instance.playerentity && !__instance.battle)
-                {
-                    __instance.rigid.interpolation = RigidbodyInterpolation.Interpolate;
-                }
+                __instance.rigid.interpolation = RigidbodyInterpolation.Interpolate;
             }
         }
-        [HarmonyPatch(typeof(EntityControl), "UpdateFlip")]
-        private class UpdateFlipPatch
+
+        [HarmonyPatch(nameof(EntityControl.UpdateFlip)), HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> UpdateFlipPatch(IEnumerable<CodeInstruction> instructions)
         {
-            [HarmonyTranspiler]
-            private static IEnumerable<CodeInstruction> Patch(IEnumerable<CodeInstruction> instructions)
-            {
-                var spin = AccessTools.Field(typeof(EntityControl), nameof(EntityControl.spin));
-                var sprite = AccessTools.Field(typeof(EntityControl), nameof(EntityControl.spritetransform));
-                var codematcher = new CodeMatcher(instructions)
+            FieldInfo spin = AccessTools.Field(typeof(EntityControl), nameof(EntityControl.spin));
+            FieldInfo sprite = AccessTools.Field(typeof(EntityControl), nameof(EntityControl.spritetransform));
+            CodeMatcher codematcher = new CodeMatcher(instructions)
                 .MatchForward(false,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(OpCodes.Ldfld, sprite),
@@ -36,16 +33,13 @@ namespace FPSFixes.Patches
                 .Nopify(3)
                 .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_0))
                 .Set(OpCodes.Call, AccessTools.Method(typeof(Utils), nameof(Utils.EntitySpin)));
-                return codematcher.InstructionEnumeration();
-            }
+            return codematcher.InstructionEnumeration();
         }
-        [HarmonyPatch(typeof(EntityControl), "GetFlipSpeed")]
-        private class GetFlipPatch
+
+        [HarmonyPatch(nameof(EntityControl.GetFlipSpeed)), HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> GetFlipPatch(IEnumerable<CodeInstruction> instructions)
         {
-            [HarmonyTranspiler]
-            private static IEnumerable<CodeInstruction> Patch(IEnumerable<CodeInstruction> instructions)
-            {
-                return new CodeMatcher(instructions)
+            return new CodeMatcher(instructions)
                 .MatchForward(true,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(OpCodes.Ldfld),
@@ -53,9 +47,8 @@ namespace FPSFixes.Patches
                 )
                 .AddCustomDeltaTime(60f, 0, false, false)
                 .InstructionEnumeration();
-            }
         }
-        
+
         [HarmonyPatch(typeof(EntityControl))]
         private static class LeifFlyPatch
         {
@@ -65,10 +58,9 @@ namespace FPSFixes.Patches
                 return new CodeMatcher(instructions)
                     .MatchForward(false,
                         new CodeMatch(OpCodes.Ldarg_0),
-                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(EntityControl), "leiffly"))
-                    ).MatchThenNopify(true,
-                        new CodeMatch(OpCodes.Call),
-                        new CodeMatch(OpCodes.Callvirt))
+                        new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(EntityControl), "leiffly")))
+                    .SetOpcodeAndAdvance(OpCodes.Ret)
+                    .Insert(new CodeInstruction(OpCodes.Ldarg_0))
                     .InstructionEnumeration();
             }
 
@@ -77,22 +69,20 @@ namespace FPSFixes.Patches
             {
                 if (__instance.leiffly && MainManager.player != null && !MainManager.instance.inevent)
                 {
-                    __instance.transform.position = Vector3.Lerp(__instance.transform.position,
+                    __instance.transform.position = Vector3.Lerp(
+                        __instance.transform.position,
                         MainManager.player.transform.position +
                         MainManager.player.entity.spritetransform.right.normalized * 1.5f +
-                        MainManager.instance.globalcamdir.forward.normalized * 0.2f, MainManager.framestep * 0.05f);
+                        MainManager.instance.globalcamdir.forward.normalized * 0.2f,
+                        Time.deltaTime * 60 * 0.05f);
                 }
             }
         }
-        [HarmonyPatch(typeof(EntityControl))]
-        [HarmonyPatch("ShakeSprite", [typeof(Vector3), typeof(float)])]
-        private static class ShakeSpritePatch
+
+        [HarmonyPatch("ShakeSprite", [typeof(Vector3), typeof(float)]), HarmonyPostfix]
+        private static void ShakeSpritePatch(EntityControl __instance, Vector3 ___extraoffset)
         {
-            [HarmonyPostfix]
-            private static void Patch(EntityControl __instance, Vector3 ___extraoffset)
-            {
-                __instance.spritetransform.localPosition = Vector3.zero + ___extraoffset;
-            }
+            __instance.spritetransform.localPosition = Vector3.zero + ___extraoffset;
         }
     }
 }

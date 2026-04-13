@@ -4,15 +4,13 @@ using HarmonyLib;
 
 namespace FPSFixes.Patches
 {
+    [HarmonyPatch(typeof(ScrewPlatform))]
     internal class ScrewPlatformPatches
     {
-        [HarmonyPatch(typeof(ScrewPlatform), "Update")]
-        private static class RotaterPatch
+        [HarmonyPatch(nameof(ScrewPlatform.Update)), HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> RotaterPatch(IEnumerable<CodeInstruction> instructions)
         {
-            [HarmonyTranspiler]
-            private static IEnumerable<CodeInstruction> Patch(IEnumerable<CodeInstruction> instructions)
-            {
-                return new CodeMatcher(instructions)
+            return new CodeMatcher(instructions)
                 .MatchForward(false,
                     new CodeMatch(OpCodes.Ldloc_0),
                     new CodeMatch(OpCodes.Brfalse)
@@ -22,7 +20,6 @@ namespace FPSFixes.Patches
                 .InsertAndAdvance(
                     new CodeInstruction(OpCodes.Stloc_1)
                 ).InstructionEnumeration();
-            }
         }
     }
 }
