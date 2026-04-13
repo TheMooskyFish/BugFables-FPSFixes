@@ -6,7 +6,7 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(BattleControl))]
-    internal class BattleControl_P
+    internal class BattleControlPatches
     {
         [HarmonyPatch(nameof(BattleControl.CounterAnimation), MethodType.Enumerator), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> CounterAnimationPatch(IEnumerable<CodeInstruction> instructions)

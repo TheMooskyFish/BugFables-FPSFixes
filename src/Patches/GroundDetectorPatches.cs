@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(GroundDetector))]
-    internal class GroundDetector_P
+    internal class GroundDetectorPatches
     {
         [HarmonyPatch(nameof(GroundDetector.OnTriggerStay)), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> OnTriggerStayPatch(IEnumerable<CodeInstruction> instructions)

@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(PlayerControl))]
-    internal class PlayerControl_P
+    internal class PlayerControlPatches
     {
         [HarmonyPatch(nameof(PlayerControl.DoActionHold)), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> PlayerActionHold(IEnumerable<CodeInstruction> instructions)

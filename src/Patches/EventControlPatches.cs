@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(EventControl))]
-    internal class EventControl_P
+    internal class EventControlPatches
     {
         private static readonly int[] SafeEvents = [2, 11, 14, 85, 200]; //TODO: check more events
         [HarmonyPatch(nameof(EventControl.StartEvent)), HarmonyPostfix]

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace FPSFixes.Patches
 {
-    internal class EntityControl_P
+    internal class EntityControlPatches
     {
         [HarmonyPatch(typeof(EntityControl), "Start")]
         private class InterpolateEntity

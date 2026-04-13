@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(NPCControl))]
-    internal class NPCControl_P
+    internal class NPCControlPatches
     {
         [HarmonyPatch("Update"), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> SavePoint(IEnumerable<CodeInstruction> instructions)

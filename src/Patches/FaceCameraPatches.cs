@@ -4,7 +4,7 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(FaceCamera))]
-    internal class FaceCamera_P
+    internal class FaceCameraPatches
     {
         [HarmonyPatch("Start"), HarmonyPostfix]
         private static void Start(FaceCamera __instance)

@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(PrefabParticle))]
-    internal class PrefabParticle_P
+    internal class PrefabParticlePatches
     {
         [HarmonyPatch("LateUpdate"), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> UpdatePatch(IEnumerable<CodeInstruction> instructions)

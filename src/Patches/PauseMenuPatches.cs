@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(PauseMenu))]
-    internal class PauseMenu_P
+    internal class PauseMenuPatches
     {
         [HarmonyPatch(nameof(PauseMenu.Update)), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> PauseFPSPatch(IEnumerable<CodeInstruction> instructions)

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(MainManager))]
-    internal class MainManager_P
+    internal class MainManagerPatches
     {
         [HarmonyPatch(nameof(MainManager.Transition), MethodType.Enumerator), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> TransitionPatch(IEnumerable<CodeInstruction> instructions)

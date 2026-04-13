@@ -4,7 +4,7 @@ using UnityEngine;
 namespace FPSFixes.Patches
 {
     [HarmonyPatch(typeof(DialogueAnim))]
-    internal class DialogueAnim_P
+    internal class DialogueAnimPatches
     {
         [HarmonyPatch("FixedUpdate"), HarmonyPrefix]
         private static bool DisableUpdate(DialogueAnim __instance)

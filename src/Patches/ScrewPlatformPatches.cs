@@ -4,7 +4,7 @@ using HarmonyLib;
 
 namespace FPSFixes.Patches
 {
-    internal class ScrewPlatform_P
+    internal class ScrewPlatformPatches
     {
         [HarmonyPatch(typeof(ScrewPlatform), "Update")]
         private static class RotaterPatch

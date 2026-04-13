@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FPSFixes.Patches
 {
-    internal class StartMenu_P
+    internal class StartMenuPatches
     {
         [HarmonyPatch(typeof(StartMenu), "SetMenuText")]
         private static class StartMenuVersion
