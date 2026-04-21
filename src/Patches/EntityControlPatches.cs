@@ -79,6 +79,21 @@ namespace FPSFixes.Patches
             }
         }
 
+        [HarmonyPatch(nameof(EntityControl.Drop), MethodType.Enumerator), HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> UseMathfPowForDrop(IEnumerable<CodeInstruction> instructions)
+        {
+            return new CodeMatcher(instructions).MatchForward(true,
+                    new CodeMatch(OpCodes.Ldfld),
+                    new CodeMatch(OpCodes.Ldc_R4, 1.1f),
+                    new CodeMatch(OpCodes.Mul))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(Time), nameof(Time.deltaTime))),
+                    new CodeInstruction(OpCodes.Ldc_R4, 60f),
+                    new CodeInstruction(OpCodes.Mul),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Mathf), nameof(Mathf.Pow))))
+                .InstructionEnumeration();
+        }
+        
         [HarmonyPatch("ShakeSprite", [typeof(Vector3), typeof(float)]), HarmonyPostfix]
         private static void ShakeSpritePatch(EntityControl __instance, Vector3 ___extraoffset)
         {
