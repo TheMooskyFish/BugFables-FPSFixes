@@ -55,22 +55,24 @@ namespace FPSFixes.Patches
             [HarmonyPatch("Update"), HarmonyTranspiler]
             private static IEnumerable<CodeInstruction> RemoveUpdatePos(IEnumerable<CodeInstruction> instructions)
             {
-                var codematcher = new CodeMatcher(instructions);
-                codematcher.MatchForward(false,
-                    new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(NPCControl), nameof(NPCControl.ColliderNotThis)))
-                ).MatchForward(false,
+                return new CodeMatcher(instructions)
+                .MatchForward(false,
+                    new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(NPCControl), nameof(NPCControl.ColliderNotThis))))
+                .MatchForward(false,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(NPCControl), nameof(NPCControl.internalvector))),
                     new CodeMatch(OpCodes.Ldc_I4_1),
                     new CodeMatch(OpCodes.Ldarg_0),
-                    new CodeMatch(OpCodes.Call)
-                ).Nopify(6)
+                    new CodeMatch(OpCodes.Call))
+                .MatchThenNopify(true, new CodeMatch(OpCodes.Stelem))
                 .MatchForward(false,
                     new CodeMatch(OpCodes.Ldarg_0),
                     new CodeMatch(OpCodes.Call),
-                    new CodeMatch(OpCodes.Dup)
-                ).Nopify(17);
-                return codematcher.InstructionEnumeration();
+                    new CodeMatch(OpCodes.Dup))
+                .MatchThenNopify(true, 
+                    new CodeMatch(OpCodes.Call),
+                    new CodeMatch(OpCodes.Callvirt))
+                .InstructionEnumeration();
             }
         }
     }
