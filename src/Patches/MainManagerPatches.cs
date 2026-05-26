@@ -24,6 +24,8 @@ namespace FPSFixes.Patches
         [HarmonyPatch(nameof(MainManager.DoClock)), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> RemoveGCCollect(IEnumerable<CodeInstruction> instructions)
         {
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.Lyght.BugFables.plugins.BFPlus")) 
+                return instructions;
             return new CodeMatcher(instructions)
             .MatchForward(false,
                 new CodeMatch(OpCodes.Ldarg_0),
