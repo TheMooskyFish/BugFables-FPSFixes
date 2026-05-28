@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
+using System;
 using UnityEngine;
 
 namespace FPSFixes.Patches
@@ -48,43 +49,41 @@ namespace FPSFixes.Patches
                 new CodeMatch(OpCodes.Ldc_R4, 0.2f)
             ).AddCustomDeltaTime(50f, 1, false, false).InstructionEnumeration();
         }
-        [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyTranspiler]
-        private static IEnumerable<CodeInstruction> RemoveVinesRotationScale(IEnumerable<CodeInstruction> instructions)
+
+        [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyPrefix]
+        private static bool RemoveFixedUpdate() => false;
+
+        [HarmonyPatch(nameof(BattleControl.Update)), HarmonyPrefix]
+        private static void AddFixedUpdateToUpdate(BattleControl __instance) => BattleFixedUpdate(__instance);
+
+        [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyReversePatch]
+        private static void BattleFixedUpdate(BattleControl __instance)
         {
-            return new CodeMatcher(instructions).MatchForward(false,
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), nameof(BattleControl.currentaction)))
-            ).MatchThenNopify(false,
-                new CodeMatch(OpCodes.Ldarg_0),
-                new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(BattleControl), nameof(BattleControl.enemy)))
-            ).InstructionEnumeration();
-        }
-        [HarmonyPatch(nameof(BattleControl.LateUpdate)), HarmonyPrefix]
-        private static void LateUpdatePatch(BattleControl __instance)
-        {
-            if (MainManager.instance.inbattle && MainManager.pausemenu == null && __instance.choicevine != null)
+            throw new NotImplementedException();
+
+#pragma warning disable CS8321 // Local function is declared but never used
+            IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+#pragma warning restore CS8321 // Local function is declared but never used
             {
-                Transform children = __instance.choicevine.GetChild(0);
-                if (__instance.currentaction == BattleControl.Pick.BaseAction)
+                CodeMatcher codeMatcher = new(instructions);
+                for (int i = 0; i < 3; i++) //rotation vines
                 {
-                    __instance.UpdateRotation(__instance.option);
-                    foreach (Transform child in children)
-                        child.localScale = Vector3.Lerp(child.localScale, Vector3.one * 2.5f, 
-                            Utils.AddDeltaTime(0.15f, 50f, false));
+                    codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 0.15f))
+                        .SetOperandAndAdvance((float)codeMatcher.Operand * 50)
+                        .Insert(
+                            new CodeInstruction(OpCodes.Call,
+                                AccessTools.PropertyGetter(typeof(Time), nameof(Time.deltaTime))),
+                            new CodeInstruction(OpCodes.Mul));
                 }
-                else
-                {
-                    __instance.UpdateRotation(__instance.lastoption);
-                    foreach (Transform child in children)
-                        if (__instance.lastoption == child.GetSiblingIndex())
-                            child.localScale = Vector3.Lerp(
-                                child.localScale, 
-                                new Vector3(2.5f, __instance.currentaction == BattleControl.Pick.SelectPlayer ? 2f : 2.5f, 2.5f),
-                                Utils.AddDeltaTime(0.15f, 50f, false));
-                        else
-                            child.localScale = Vector3.Lerp(child.localScale, new Vector3(2.5f, 1.5f, 2.5f), 
-                                Utils.AddDeltaTime(0.15f, 50f, false));
-                }
+
+                codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 0.2f)) //cursor
+                    .SetOperandAndAdvance((float)codeMatcher.Operand * 50)
+                    .Insert(
+                        new CodeInstruction(OpCodes.Call,
+                            AccessTools.PropertyGetter(typeof(Time), nameof(Time.deltaTime))),
+                        new CodeInstruction(OpCodes.Mul));
+
+                return codeMatcher.InstructionEnumeration();
             }
         }
         [HarmonyPatch(nameof(BattleControl.DoCommand), MethodType.Enumerator), HarmonyTranspiler]
