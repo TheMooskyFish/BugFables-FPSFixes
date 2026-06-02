@@ -11,7 +11,9 @@ namespace FPSFixes.Patches
         private static void StartEventPatch()
         {
             var safeEventCheck = SafeEvents.Contains(MainManager.lastevent);
+#if DEBUG
             CorePlugin.Logger.LogInfo($"Start Event: {MainManager.lastevent} - Safe Event Check: {safeEventCheck}");
+#endif
             if (safeEventCheck) return;
             if (MainManager.map?.chompy)
                 Utils.ChangeInterpolation(MainManager.map?.chompy, false);
@@ -22,7 +24,9 @@ namespace FPSFixes.Patches
         private static void EndEventPatch()
         {
             var safeEventCheck = SafeEvents.Contains(MainManager.lastevent);
+#if DEBUG
             CorePlugin.Logger.LogInfo($"End Event: {MainManager.lastevent} - Safe Event Check: {safeEventCheck}");
+#endif
             if (MainManager.map?.chompy)
                 Utils.ChangeInterpolation(MainManager.map?.chompy, true);
             foreach (var plr in MainManager.instance.playerdata)
