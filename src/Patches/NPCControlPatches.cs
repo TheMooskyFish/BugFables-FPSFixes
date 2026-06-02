@@ -46,7 +46,8 @@ namespace FPSFixes.Patches
             private static void FixedUpdatePos(NPCControl __instance)
             {
                 if (MainManager.instance.pause || MainManager.instance.minipause) return;
-                if (__instance.objecttype == NPCControl.ObjectTypes.PushRock && __instance.data.Length == 3 && __instance.hit)
+                if (__instance.objecttype == NPCControl.ObjectTypes.PushRock && __instance.data.Length > 2 &&
+                    __instance.data[2] > 0 && __instance.hit)
                 {
                     __instance.internalvector[1] = __instance.entity.rigid.position;
                     __instance.entity.rigid.position += __instance.internalvector[0] * (__instance.vectordata[0].z * 1.25f);
