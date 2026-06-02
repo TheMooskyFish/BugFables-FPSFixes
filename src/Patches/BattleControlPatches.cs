@@ -50,42 +50,47 @@ namespace FPSFixes.Patches
             ).AddCustomDeltaTime(50f, 1, false, false).InstructionEnumeration();
         }
 
-        [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyPrefix]
-        private static bool RemoveFixedUpdate() => false;
-
-        [HarmonyPatch(nameof(BattleControl.Update)), HarmonyPrefix]
-        private static void AddFixedUpdateToUpdate(BattleControl __instance) => BattleFixedUpdate(__instance);
-
-        [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyReversePatch]
-        private static void BattleFixedUpdate(BattleControl __instance)
+        [HarmonyPatch(typeof(BattleControl))]
+        internal static class BattleControlReversePatch
         {
-            throw new NotImplementedException();
+            [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyPrefix]
+            private static bool RemoveFixedUpdate() => false;
+
+            [HarmonyPatch(nameof(BattleControl.Update)), HarmonyPrefix]
+            private static void AddBattleFixedUpdateToUpdate(BattleControl __instance) => BattleFixedUpdate(__instance);
+
+            [HarmonyPatch(nameof(BattleControl.FixedUpdate)), HarmonyReversePatch]
+            private static void BattleFixedUpdate(BattleControl __instance)
+            {
+                throw new NotImplementedException();
 
 #pragma warning disable CS8321 // Local function is declared but never used
-            IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 #pragma warning restore CS8321 // Local function is declared but never used
-            {
-                CodeMatcher codeMatcher = new(instructions);
-                for (int i = 0; i < 3; i++) //rotation vines
                 {
-                    codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 0.15f))
+                    CodeMatcher codeMatcher = new(instructions);
+                    for (int i = 0; i < 3; i++) //rotation vines
+                    {
+                        codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 0.15f))
+                            .SetOperandAndAdvance((float)codeMatcher.Operand * 50)
+                            .Insert(
+                                new CodeInstruction(OpCodes.Call,
+                                    AccessTools.PropertyGetter(typeof(Time), nameof(Time.deltaTime))),
+                                new CodeInstruction(OpCodes.Mul));
+                    }
+
+                    codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 0.2f)) //cursor
                         .SetOperandAndAdvance((float)codeMatcher.Operand * 50)
                         .Insert(
                             new CodeInstruction(OpCodes.Call,
                                 AccessTools.PropertyGetter(typeof(Time), nameof(Time.deltaTime))),
                             new CodeInstruction(OpCodes.Mul));
+
+                    return codeMatcher.InstructionEnumeration();
                 }
-
-                codeMatcher.MatchForward(false, new CodeMatch(OpCodes.Ldc_R4, 0.2f)) //cursor
-                    .SetOperandAndAdvance((float)codeMatcher.Operand * 50)
-                    .Insert(
-                        new CodeInstruction(OpCodes.Call,
-                            AccessTools.PropertyGetter(typeof(Time), nameof(Time.deltaTime))),
-                        new CodeInstruction(OpCodes.Mul));
-
-                return codeMatcher.InstructionEnumeration();
             }
         }
+
         [HarmonyPatch(nameof(BattleControl.DoCommand), MethodType.Enumerator), HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> RemoveTieFrameRateForBarFill(IEnumerable<CodeInstruction> instructions)
         {
